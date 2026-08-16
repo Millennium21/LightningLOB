@@ -22,6 +22,7 @@ find_package(Threads REQUIRED)
 
 add_library(lightninglob STATIC
     src/order_book_map.cpp
+    src/order_book_vector.cpp
 )
 add_library(lightninglob::lightninglob ALIAS lightninglob)
 
