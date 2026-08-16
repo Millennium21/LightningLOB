@@ -17,3 +17,9 @@ add_library(lightninglob_warnings INTERFACE)
 target_compile_options(lightninglob_warnings INTERFACE
     -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion
 )
+
+option(LIGHTNINGLOB_BUILD_TESTS "Build the Google Test suite" ON)
+if(LIGHTNINGLOB_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
