@@ -17,10 +17,10 @@ add_executable(lightninglob_tests
 )
 
 target_link_libraries(lightninglob_tests PRIVATE
+    lightninglob::lightninglob
     lightninglob_warnings
     GTest::gtest_main
 )
-target_include_directories(lightninglob_tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
 include(GoogleTest)
 gtest_discover_tests(lightninglob_tests)

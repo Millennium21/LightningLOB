@@ -18,6 +18,23 @@ target_compile_options(lightninglob_warnings INTERFACE
     -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion
 )
 
+find_package(Threads REQUIRED)
+
+add_library(lightninglob STATIC
+    src/order_book_map.cpp
+)
+add_library(lightninglob::lightninglob ALIAS lightninglob)
+
+target_include_directories(lightninglob PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+target_link_libraries(lightninglob PUBLIC Threads::Threads PRIVATE lightninglob_warnings)
+target_compile_features(lightninglob PUBLIC cxx_std_20)
+
+if(LIGHTNINGLOB_IPO_SUPPORTED AND CMAKE_BUILD_TYPE STREQUAL "Release")
+    set_property(TARGET lightninglob PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
 option(LIGHTNINGLOB_BUILD_TESTS "Build the Google Test suite" ON)
 if(LIGHTNINGLOB_BUILD_TESTS)
     enable_testing()
