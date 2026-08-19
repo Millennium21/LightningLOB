@@ -24,6 +24,7 @@ add_library(lightninglob STATIC
     src/order_book_map.cpp
     src/order_book_vector.cpp
     src/order_book_array.cpp
+    src/risk_manager.cpp
 )
 add_library(lightninglob::lightninglob ALIAS lightninglob)
 
