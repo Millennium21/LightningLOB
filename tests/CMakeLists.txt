@@ -14,6 +14,8 @@ add_executable(lightninglob_tests
     bitset_utils_test.cpp
     order_pool_test.cpp
     id_index_map_test.cpp
+    order_book_test.cpp
+    order_book_array_test.cpp
 )
 
 target_link_libraries(lightninglob_tests PRIVATE
