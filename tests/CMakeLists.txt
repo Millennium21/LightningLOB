@@ -19,6 +19,7 @@ add_executable(lightninglob_tests
     risk_manager_test.cpp
     matching_engine_test.cpp
     lockfree_queue_test.cpp
+    order_gateway_test.cpp
 )
 
 target_link_libraries(lightninglob_tests PRIVATE
