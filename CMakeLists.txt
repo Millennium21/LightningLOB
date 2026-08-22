@@ -26,6 +26,7 @@ add_library(lightninglob STATIC
     src/order_book_array.cpp
     src/risk_manager.cpp
     src/logger.cpp
+    src/replay.cpp
 )
 add_library(lightninglob::lightninglob ALIAS lightninglob)
 

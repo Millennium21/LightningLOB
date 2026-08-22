@@ -20,6 +20,7 @@ add_executable(lightninglob_tests
     matching_engine_test.cpp
     lockfree_queue_test.cpp
     order_gateway_test.cpp
+    replay_test.cpp
 )
 
 target_link_libraries(lightninglob_tests PRIVATE
@@ -30,3 +31,7 @@ target_link_libraries(lightninglob_tests PRIVATE
 
 include(GoogleTest)
 gtest_discover_tests(lightninglob_tests)
+
+target_compile_definitions(lightninglob_tests PRIVATE
+    LIGHTNINGLOB_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/data"
+)
