@@ -21,6 +21,7 @@ add_executable(lightninglob_tests
     lockfree_queue_test.cpp
     order_gateway_test.cpp
     replay_test.cpp
+    thread_affinity_test.cpp
 )
 
 target_link_libraries(lightninglob_tests PRIVATE
