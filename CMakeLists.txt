@@ -45,3 +45,6 @@ if(LIGHTNINGLOB_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
+
+add_executable(lightninglob_cli src/main.cpp)
+target_link_libraries(lightninglob_cli PRIVATE lightninglob lightninglob_warnings)
