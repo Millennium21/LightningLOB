@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    name: Build & test (${{ matrix.build_type }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Debug, Release]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+      - name: Build
+        run: cmake --build build -j$(nproc)
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  warnings-check:
+    name: Strict warnings (must be zero)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build and capture warnings
+        run: |
+          cmake --build build -j$(nproc) 2>&1 | tee build.log
+          if grep -iE "warning" build.log | grep -v "_deps/"; then
+            echo "::error::Warnings found in project code (see above) — this project targets a clean build under -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion."
+            exit 1
+          fi
+          echo "No warnings in project code."
+
+  sanitizers:
+    name: ${{ matrix.sanitizer }} sanitizer
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [address, thread, undefined]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: >
+          cmake -B build
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DLIGHTNINGLOB_SANITIZER=${{ matrix.sanitizer }}
+          -DLIGHTNINGLOB_BUILD_BENCHMARKS=OFF
+
+      - name: Build
+        run: cmake --build build --target lightninglob_tests -j$(nproc)
+
+      - name: Test under sanitizer
+        run: ./build/tests/lightninglob_tests --gtest_filter="-*TwoThreadStressTest*"
+        # The two-thread SPSC stress test (5,000,000 records) is skipped
+        # only for the thread/address sanitizer runs' default filter here
+        # to keep CI fast under heavy instrumentation; it is still run in
+        # full by the plain Debug/Release jobs above, and was additionally
+        # verified locally under ThreadSanitizer during development (see
+        # README.md "Concurrency correctness").
+
+      - name: Run SPSC stress test under sanitizer (allowed more time)
+        run: ./build/tests/lightninglob_tests --gtest_filter="*TwoThreadStressTest*"
+        timeout-minutes: 5
+
+  benchmarks-smoke:
+    name: Benchmarks build & run (smoke only, not a perf gate)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --target lightninglob_benchmarks -j$(nproc)
+
+      - name: Smoke-run (short, just confirms every benchmark executes)
+        run: ./build/benchmarks/lightninglob_benchmarks --benchmark_min_time=0.01s
+        # Deliberately not a performance gate: shared CI runners are too
+        # noisy for absolute-latency thresholds to be meaningful (see
+        # README.md's own caveat about this project's benchmark numbers
+        # being measured on a noisy shared sandbox for the same reason).
+        # This job exists to catch a benchmark that fails to *run* at all,
+        # not to assert on its numbers.
